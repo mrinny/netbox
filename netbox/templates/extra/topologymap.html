@@ -1,0 +1,52 @@
+ 
+{% extends '_base.html' %}
+{% load static from staticfiles %}
+{% load secret_helpers %}
+
+{% block title %}Topology:{{ topology }}{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/vis.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h1>Topology: {{ topology }}</h1>
+<div id="topology"></div>
+{% if devices and connections }}
+<script type="text/javascript">
+    // create a DataSet with the devices
+    var nodes = new vis.DataSet([
+        {% for device in devices %}
+            {id: {{ device.name }}, label: {{ device.label }},color.background: {{ device.color }}},
+        {% endfor %}
+    ]);
+    
+    var edges = new vis.DataSet([
+        {% for connection in connections %}
+            {from: {{ connection.from }}, to: {{ connection.to }},title: {{ connection.label }},color: {{ connection.color }}},
+        {% endfor %}
+    ]);
+    
+    // Create a network
+    var container = document.getElementById('topology');
+    
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    
+    var options = {};
+    
+    var network = new vis.Network(container, data, options);
+</script>
+{% else %}
+    <h2>Failed to retreive Topology</h2>
+{% endif %}
+
+{% include 'secrets/inc/private_key_modal.html' %}
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/vis.js' %}"></script>
+{% endblock %}
